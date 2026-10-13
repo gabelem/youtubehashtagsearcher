@@ -264,10 +264,3 @@ internal_tags
 - Videos without a valid upload date are skipped when `--days` is greater than zero.
 
 - The script only reads public metadata; it does not download videos.
-
-## Project Files
-
-```
-youtube_hashtag_generator.py  Main Python script
-README.md                     Project documentation
-```
