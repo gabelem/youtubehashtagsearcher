@@ -20,7 +20,7 @@ The tool uses `yt-dlp`, does not require a YouTube API key, and analyzes:
 
 - Python 3.9 or higher
 
-- Internet access
+- Internet access xd
 
 > Note: The original text says “Internet kkj,” which appears to be a typo or informal remark.
 
