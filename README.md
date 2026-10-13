@@ -1,39 +1,41 @@
 # YouTube Hashtag Generator
 
-Python script that searches public YouTube videos and suggests hashtags related to the specified topic.
+A Python tool that searches public YouTube videos and suggests relevant hashtags for a topic or video title.
 
-The tool uses `yt-dlp`, does not require a YouTube API key, and analyzes:
+The tool uses [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and does not require a YouTube API key.
 
-- videos related to the searched title;
+## Features
 
-- number of views;
+- Searches public YouTube videos related to a topic.
 
-- publication date;
+- Analyzes video titles, descriptions, views, upload dates, visible hashtags, and internal tags.
 
-- hashtags present in titles and descriptions;
+- Prioritizes hashtags used directly by video creators.
 
-- internal video tags;
+- Filters hashtags based on their relevance to the search topic.
 
-- tag relevance in relation to the searched topic.
+- Supports filtering videos by publication date.
+
+- Displays the videos used to generate the suggestions.
+
+- Exports results as Markdown or JSON.
 
 ## Requirements
 
-- Python 3.9 or higher
+- Python 3.9 or newer
 
-- Internet access xd
-
-> Note: The original text says “Internet kkj,” which appears to be a typo or informal remark.
+- Internet connection
 
 ## Installation
 
-Clone the project or download the files:
+Clone the repository or download the project files:
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
 cd YOUR-REPOSITORY
 ```
 
-Create and activate a virtual environment:
+Create and activate a virtual environment.
 
 ### Linux or macOS
 
@@ -59,81 +61,146 @@ python -m pip install -U yt-dlp
 ## Basic Usage
 
 ```bash
-python gerador_hashtags_youtube.py "jerk drill type beat"
+python youtube_hashtag_generator.py "jerk drill type beat"
 ```
 
-The program searches recent videos, calculates the most relevant hashtags, and displays the videos considered.
+By default, the program searches up to 20 videos from the last 365 days and generates up to 15 hashtags.
 
-## Saving Hashtags in Markdown
+## Command-Line Options
 
-To save only the hashtags to an `.md` file:
+| Option | Description | Default |
+| --- | --- | --- |
+| `-n`, `--results` | Number of videos to search | `20` |
+| `-t`, `--hashtags` | Maximum number of hashtags to generate | `15` |
+| `--days` | Consider videos published within the last N days | `365` |
+| `--md FILE` | Save only the hashtags to a Markdown file | — |
+| `--json FILE` | Save the complete results to a JSON file | — |
+
+Use `--days 0` to search across YouTube's entire available history.
+
+## Examples
+
+### Search for recent videos
+
+Search videos from the last 30 days and generate up to 10 hashtags:
 
 ```bash
-python gerador_hashtags_youtube.py \
+python youtube_hashtag_generator.py \
+  "digital marketing for beginners" \
+  --days 30 \
+  --results 60 \
+  --hashtags 10
+```
+
+### Save hashtags to Markdown
+
+```bash
+python youtube_hashtag_generator.py \
   "jerk drill type beat" \
   --md hashtags.md
 ```
 
-The file will contain a line similar to:
+The generated file contains one line, for example:
 
 ```
 #jerkdrill #nydrill #hoodtraptypebeat
 ```
 
-## Saving Complete Data as JSON
+### Save complete results to JSON
 
 ```bash
-python gerador_hashtags_youtube.py \
+python youtube_hashtag_generator.py \
   "jerk drill type beat" \
-  --json resultado.json
+  --json results.json
 ```
 
-The JSON contains the suggested hashtags, scores, frequency, and data from the analyzed videos.
+The JSON file includes:
 
-## Main Options
+- The original search query
 
-| Option | Description | Default |
-| --- | --- | --- |
-| `--resultados` or `-n` | Number of videos to search | `20` |
-| `--hashtags` or `-t` | Maximum number of hashtags | `15` |
-| `--dias` | Consider videos published within the last N days | `365` |
-| `--md` | Markdown file containing only the hashtags | — |
-| `--json` | JSON file containing the complete data | — |
+- The date filter
 
-## Examples
+- Suggested hashtags
 
-Search for videos from the last 30 days and generate 10 hashtags:
+- Hashtag scores
 
-```bash
-python gerador_hashtags_youtube.py "digital marketing for beginners" --dias 30 --resultados 60 --hashtags 42 --md hashtags.md
-```
+- Hashtag frequency
 
-Search using YouTube’s entire history:
+- Data for the analyzed videos
+
+### Generate Markdown and JSON simultaneously
 
 ```bash
-python gerador_hashtags_youtube.py \
-  "chocolate cake recipe" \
-  --dias 0 \
-  --md hashtags.md
-```
-
-Generate Markdown and JSON files at the same time:
-
-```bash
-python gerador_hashtags_youtube.py \
+python youtube_hashtag_generator.py \
   "workout to gain muscle mass" \
   --md hashtags.md \
-  --json resultado.json
+  --json results.json
 ```
 
-## Notes
+### Search all available history
 
-- The script uses YouTube’s public search through `yt-dlp`.
+```bash
+python youtube_hashtag_generator.py \
+  "chocolate cake recipe" \
+  --days 0
+```
 
-- Providing an API key is not necessary.
+## Output
 
-- The hashtags are suggestions based on the videos found; they do not guarantee an increase in views.
+The terminal displays the suggested hashtags and the videos considered, ranked by view count. For example:
+
+```
+Suggested hashtags:
+
+#chocolatecakerecipe #easycake #baking
+
+Data source: 20 public videos from the last 365 days, 42 hashtags found in titles, descriptions, and tags, ranked by views.
+
+Videos considered:
+ 1.     1.2M | Easy Chocolate Cake Recipe — Example Channel
+```
+
+## How Hashtags Are Ranked
+
+The ranking considers:
+
+1. Whether the hashtag was explicitly used by the creator in the title or description.
+
+1. Whether the hashtag appears in the video's internal tags.
+
+1. The number of videos containing the hashtag.
+
+1. The number of views on the videos containing the hashtag.
+
+1. The hashtag's relevance to the search query and video titles.
+
+1. The position of each video in the search results.
+
+Creator-provided hashtags receive a higher score than internal video tags.
+
+## Notes and Limitations
+
+- The script uses YouTube's public search through `yt-dlp`.
+
+- A YouTube API key is not required.
+
+- Hashtags are suggestions based on the videos found; they do not guarantee more views.
 
 - YouTube may change its search system or limit automated queries.
 
-- If the search does not return recent results, try increasing the value of `--dias` or using `--dias 0`.
+- Search results depend on YouTube's current availability and ranking system.
+
+- If no recent videos are found, increase the value of `--days` or use `--days 0`.
+
+- The tool does not download videos; it only collects public metadata.
+
+## Project Files
+
+```
+youtube_hashtag_generator.py  Main Python script
+README.md                     Project documentation
+```
+
+## License
+
+Add your preferred license here before publishing the project. For example, you may use the [MIT License](https://opensource.org/license/mit/).
