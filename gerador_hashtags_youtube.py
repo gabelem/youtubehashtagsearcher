@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gerador de hashtags em alta para YouTube, sem YouTube Data API Key.. SIM... isso foi vibecodado @-@
+"""Gerador de hashtags em alta para YouTube. SIM... isso foi vibecodado @-@
 
 A busca usa o mecanismo público de pesquisa do YouTube por meio do yt-dlp.
 Instalação: python -m pip install -U yt-dlp
