@@ -271,7 +271,3 @@ internal_tags
 youtube_hashtag_generator.py  Main Python script
 README.md                     Project documentation
 ```
-
-## License
-
-No license is included yet. Add a license before publishing or redistributing the project. The [MIT License](https://opensource.org/license/mit/) is one possible choice.
