@@ -1,41 +1,27 @@
 # YouTube Hashtag Generator
 
-A Python tool that searches public YouTube videos and suggests relevant hashtags for a topic or video title.
+A Python command-line tool that searches public YouTube videos and suggests hashtags related to a title or topic.
 
-The tool uses [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) and does not require a YouTube API key.
-
-## Features
-
-- Searches public YouTube videos related to a topic.
-
-- Analyzes video titles, descriptions, views, upload dates, visible hashtags, and internal tags.
-
-- Prioritizes hashtags used directly by video creators.
-
-- Filters hashtags based on their relevance to the search topic.
-
-- Supports filtering videos by publication date.
-
-- Displays the videos used to generate the suggestions.
-
-- Exports results as Markdown or JSON.
+The script uses [`yt-dlp`](https://github.com/yt-dlp/yt-dlp) to query YouTube's public search. It does **not** require a YouTube API key and does not download video files.
 
 ## Requirements
 
 - Python 3.9 or newer
 
-- Internet connection
+- An internet connection
+
+- The `yt-dlp` Python package
 
 ## Installation
 
-Clone the repository or download the project files:
+Clone the repository or download `youtube_hashtag_generator.py`:
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
 cd YOUR-REPOSITORY
 ```
 
-Create and activate a virtual environment.
+Create and activate a virtual environment if desired.
 
 ### Linux or macOS
 
@@ -51,7 +37,7 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-Install the dependency:
+Install `yt-dlp`:
 
 ```bash
 python -m pip install --upgrade pip
@@ -64,25 +50,54 @@ python -m pip install -U yt-dlp
 python youtube_hashtag_generator.py "jerk drill type beat"
 ```
 
-By default, the program searches up to 20 videos from the last 365 days and generates up to 15 hashtags.
+The default behavior is:
 
-## Command-Line Options
+- Search for 20 videos after applying the date filter.
+
+- Consider videos published within the last 365 days.
+
+- Generate up to 15 hashtags.
+
+- Print the suggested hashtags and the videos considered in the terminal.
+
+## Command-Line Syntax
+
+```
+python youtube_hashtag_generator.py TITLE [OPTIONS]
+```
+
+### Arguments and options
 
 | Option | Description | Default |
 | --- | --- | --- |
-| `-n`, `--results` | Number of videos to search | `20` |
-| `-t`, `--hashtags` | Maximum number of hashtags to generate | `15` |
-| `--days` | Consider videos published within the last N days | `365` |
-| `--md FILE` | Save only the hashtags to a Markdown file | — |
-| `--json FILE` | Save the complete results to a JSON file | — |
+| `TITLE` | Required video title or search topic | — |
+| `-n`, `--results` | Number of videos returned after date filtering | `20` |
+| `-t`, `--hashtags` | Maximum number of hashtags to return | `15` |
+| `--days` | Keep videos published within the last N days | `365` |
+| `--md FILE` | Save only the suggested hashtags to a Markdown file | Not saved |
+| `--json FILE` | Save the complete result to a JSON file | Not saved |
 
-Use `--days 0` to search across YouTube's entire available history.
+The values for `--results` and `--hashtags` must be greater than zero. The value for `--days` cannot be negative.
+
+## Date Filtering
+
+By default, the script keeps videos whose `upload_date` is within the last 365 days. Videos without a valid upload date are excluded when date filtering is enabled.
+
+Use `--days 0` to disable date filtering:
+
+```bash
+python youtube_hashtag_generator.py \
+  "chocolate cake recipe" \
+  --days 0
+```
+
+`--days 0` does **not** request every video ever uploaded to YouTube. It only prevents the script from applying its local date filter to the search results returned by YouTube.
+
+When `--days` is greater than zero, the script requests three times the requested number of search results to compensate for videos that may later be excluded by the date filter. It still returns no more than the value specified by `--results`.
 
 ## Examples
 
-### Search for recent videos
-
-Search videos from the last 30 days and generate up to 10 hashtags:
+### Search recent videos
 
 ```bash
 python youtube_hashtag_generator.py \
@@ -92,7 +107,9 @@ python youtube_hashtag_generator.py \
   --hashtags 10
 ```
 
-### Save hashtags to Markdown
+This requests up to 180 YouTube search results, filters them to the last 30 days, and displays at most 60 videos. It then suggests at most 10 hashtags.
+
+### Save only the hashtags to Markdown
 
 ```bash
 python youtube_hashtag_generator.py \
@@ -100,7 +117,7 @@ python youtube_hashtag_generator.py \
   --md hashtags.md
 ```
 
-The generated file contains one line, for example:
+The Markdown file contains one line with space-separated hashtags, for example:
 
 ```
 #jerkdrill #nydrill #hoodtraptypebeat
@@ -114,21 +131,7 @@ python youtube_hashtag_generator.py \
   --json results.json
 ```
 
-The JSON file includes:
-
-- The original search query
-
-- The date filter
-
-- Suggested hashtags
-
-- Hashtag scores
-
-- Hashtag frequency
-
-- Data for the analyzed videos
-
-### Generate Markdown and JSON simultaneously
+### Generate Markdown and JSON at the same time
 
 ```bash
 python youtube_hashtag_generator.py \
@@ -137,62 +140,130 @@ python youtube_hashtag_generator.py \
   --json results.json
 ```
 
-### Search all available history
+## What the Script Analyzes
 
-```bash
-python youtube_hashtag_generator.py \
-  "chocolate cake recipe" \
-  --days 0
+For each returned video, the script collects:
+
+- Title
+
+- YouTube URL
+
+- Channel or uploader name
+
+- View count
+
+- Duration, when available
+
+- Upload date, when available
+
+- Hashtags found in the title and description
+
+- Internal tags returned by YouTube, when available
+
+Hashtags found in titles and descriptions are treated as **explicit hashtags**. Internal video tags are normalized into hashtag format and kept separately. Tags already present among the explicit hashtags are not added again.
+
+## How Hashtags Are Selected
+
+The script builds a context from:
+
+- The search title or topic
+
+- Relevant words found in the returned video titles
+
+It then evaluates explicit hashtags and internal tags. A hashtag is considered only when it has evidence connected to the search title or collected video-title context. Generic stopwords and very short terms are ignored.
+
+The score for each accepted hashtag is calculated from:
+
+- Video view count
+
+- The video's position in the returned results
+
+- Whether the hashtag was explicitly used by the creator
+
+Explicit hashtags receive a higher weight than internal tags. Frequency is used as a tie-breaker after the score, followed by term length. The final list is limited by `--hashtags`.
+
+The script provides suggestions only. It does not guarantee higher views or better YouTube rankings.
+
+## Terminal Output
+
+After a successful search, the script prints:
+
+1. The suggested hashtags.
+
+1. The number of videos used.
+
+1. The active date period or the message `all history` when `--days 0` is used.
+
+1. The number of collected hashtags.
+
+1. A list of the videos considered, sorted by view count.
+
+View counts are abbreviated in the terminal as follows:
+
+- `K` for thousands
+
+- `M` for millions
+
+- `B` for billions
+
+## Markdown Output
+
+When `--md FILE` is provided, the script writes one line containing the generated hashtags separated by spaces:
+
+```
+#hashtagone #hashtagsomething #anotherhashtag
 ```
 
-## Output
+The file is written using UTF-8 encoding. If the script finds no qualifying hashtags, the file can contain an empty line.
 
-The terminal displays the suggested hashtags and the videos considered, ranked by view count. For example:
+## JSON Output
+
+When `--json FILE` is provided, the script writes a UTF-8 JSON document with indentation. Its top-level fields are:
+
+```json
+{
+  "query": "jerk drill type beat",
+  "days_filter": 365,
+  "hashtags": [
+    {
+      "hashtag": "#jerkdrill",
+      "score": 123.4567,
+      "frequency": 3
+    }
+  ],
+  "videos": []
+}
+```
+
+Each object in `videos` contains these fields:
 
 ```
-Suggested hashtags:
-
-#chocolatecakerecipe #easycake #baking
-
-Data source: 20 public videos from the last 365 days, 42 hashtags found in titles, descriptions, and tags, ranked by views.
-
-Videos considered:
- 1.     1.2M | Easy Chocolate Cake Recipe — Example Channel
+title
+url
+channel
+views
+duration
+upload_date
+hashtags
+explicit_hashtags
+internal_tags
 ```
 
-## How Hashtags Are Ranked
+## Errors and Limitations
 
-The ranking considers:
+- If `yt-dlp` is not installed, the script prints an installation command and exits.
 
-1. Whether the hashtag was explicitly used by the creator in the title or description.
+- If YouTube cannot be queried, the script prints the error and exits with a failure status.
 
-1. Whether the hashtag appears in the video's internal tags.
+- If no videos remain after searching and date filtering, the script asks you to try a more specific title and exits with a failure status.
 
-1. The number of videos containing the hashtag.
+- YouTube may change its public search behavior or limit automated queries.
 
-1. The number of views on the videos containing the hashtag.
+- Search results, metadata availability, tags, view counts, and upload dates depend on what YouTube returns through `yt-dlp`.
 
-1. The hashtag's relevance to the search query and video titles.
+- Videos without a valid upload date are skipped when `--days` is greater than zero.
 
-1. The position of each video in the search results.
-
-Creator-provided hashtags receive a higher score than internal video tags.
-
-## Notes and Limitations
-
-- The script uses YouTube's public search through `yt-dlp`.
-
-- A YouTube API key is not required.
-
-- Hashtags are suggestions based on the videos found; they do not guarantee more views.
-
-- YouTube may change its search system or limit automated queries.
-
-- Search results depend on YouTube's current availability and ranking system.
-
-- If no recent videos are found, increase the value of `--days` or use `--days 0`.
-
-- The tool does not download videos; it only collects public metadata.
+- The script only reads public metadata; it does not download videos.
 
 ## Project Files
 
@@ -203,4 +274,4 @@ README.md                     Project documentation
 
 ## License
 
-Add your preferred license here before publishing the project. For example, you may use the [MIT License](https://opensource.org/license/mit/).
+No license is included yet. Add a license before publishing or redistributing the project. The [MIT License](https://opensource.org/license/mit/) is one possible choice.
