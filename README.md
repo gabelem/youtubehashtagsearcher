@@ -1,33 +1,41 @@
-# Gerador de Hashtags para YouTube
+# YouTube Hashtag Generator
 
-Script em Python que pesquisa vídeos públicos do YouTube e sugere hashtags relacionadas ao tema informado.
+Python script that searches public YouTube videos and suggests hashtags related to the specified topic.
 
-A ferramenta utiliza o `yt-dlp`, não exige uma YouTube API Key e analisa:
+The tool uses `yt-dlp`, does not require a YouTube API key, and analyzes:
 
-- vídeos relacionados ao título pesquisado;
-- quantidade de visualizações;
-- data de publicação;
-- hashtags presentes nos títulos e descrições;
-- tags internas dos vídeos;
-- relevância das tags em relação ao tema pesquisado.
+- videos related to the searched title;
 
-## Requisitos
+- number of views;
 
-- Python 3.9 ou superior
-- Internet kkj
+- publication date;
 
-## Instalação
+- hashtags present in titles and descriptions;
 
-Clone o projeto ou baixe os arquivos:
+- internal video tags;
+
+- tag relevance in relation to the searched topic.
+
+## Requirements
+
+- Python 3.9 or higher
+
+- Internet access
+
+> Note: The original text says “Internet kkj,” which appears to be a typo or informal remark.
+
+## Installation
+
+Clone the project or download the files:
 
 ```bash
-git clone https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git
-cd SEU-REPOSITORIO
+git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+cd YOUR-REPOSITORY
 ```
 
-Crie e ative um ambiente virtual:
+Create and activate a virtual environment:
 
-### Linux ou macOS
+### Linux or macOS
 
 ```bash
 python3 -m venv .venv
@@ -36,29 +44,29 @@ source .venv/bin/activate
 
 ### Windows PowerShell
 
-```powershell
+```
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-Instale a dependência:
+Install the dependency:
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -U yt-dlp
 ```
 
-## Uso básico
+## Basic Usage
 
 ```bash
 python gerador_hashtags_youtube.py "jerk drill type beat"
 ```
 
-O programa pesquisa vídeos recentes, calcula as hashtags mais relevantes e mostra os vídeos considerados.
+The program searches recent videos, calculates the most relevant hashtags, and displays the videos considered.
 
-## Salvar as hashtags em Markdown
+## Saving Hashtags in Markdown
 
-Para salvar somente as hashtags em um arquivo `.md`:
+To save only the hashtags to an `.md` file:
 
 ```bash
 python gerador_hashtags_youtube.py \
@@ -66,13 +74,13 @@ python gerador_hashtags_youtube.py \
   --md hashtags.md
 ```
 
-O arquivo conterá uma linha semelhante a:
+The file will contain a line similar to:
 
-```text
+```
 #jerkdrill #nydrill #hoodtraptypebeat
 ```
 
-## Salvar os dados completos em JSON
+## Saving Complete Data as JSON
 
 ```bash
 python gerador_hashtags_youtube.py \
@@ -80,48 +88,52 @@ python gerador_hashtags_youtube.py \
   --json resultado.json
 ```
 
-O JSON contém as hashtags sugeridas, pontuação, frequência e dados dos vídeos analisados.
+The JSON contains the suggested hashtags, scores, frequency, and data from the analyzed videos.
 
-## Opções principais
+## Main Options
 
-| Opção | Descrição | Padrão |
-|---|---|---:|
-| `--resultados` ou `-n` | Quantidade de vídeos pesquisados | `20` |
-| `--hashtags` ou `-t` | Quantidade máxima de hashtags | `15` |
-| `--dias` | Considera vídeos publicados nos últimos N dias | `365` |
-| `--md` | Arquivo Markdown com somente as hashtags | — |
-| `--json` | Arquivo JSON com os dados completos | — |
+| Option | Description | Default |
+| --- | --- | --- |
+| `--resultados` or `-n` | Number of videos to search | `20` |
+| `--hashtags` or `-t` | Maximum number of hashtags | `15` |
+| `--dias` | Consider videos published within the last N days | `365` |
+| `--md` | Markdown file containing only the hashtags | — |
+| `--json` | JSON file containing the complete data | — |
 
-## Exemplos
+## Examples
 
-Pesquisar vídeos dos últimos 30 dias e gerar 10 hashtags:
+Search for videos from the last 30 days and generate 10 hashtags:
 
 ```bash
-python gerador_hashtags_youtube.py "marketing digital para iniciantes" --dias 30 --resultados 60 --hashtags 42 --md hashtags.md
+python gerador_hashtags_youtube.py "digital marketing for beginners" --dias 30 --resultados 60 --hashtags 42 --md hashtags.md
 ```
 
-Pesquisar usando todo o histórico do YouTube:
+Search using YouTube’s entire history:
 
 ```bash
 python gerador_hashtags_youtube.py \
-  "receita de bolo de chocolate" \
+  "chocolate cake recipe" \
   --dias 0 \
   --md hashtags.md
 ```
 
-Gerar Markdown e JSON ao mesmo tempo:
+Generate Markdown and JSON files at the same time:
 
 ```bash
 python gerador_hashtags_youtube.py \
-  "treino para ganhar massa muscular" \
+  "workout to gain muscle mass" \
   --md hashtags.md \
   --json resultado.json
 ```
 
-## Observações
+## Notes
 
-- O script usa a busca pública do YouTube por meio do `yt-dlp`.
-- Não é necessário informar uma API Key.
-- As hashtags são sugestões baseadas nos vídeos encontrados; elas não garantem aumento de visualizações.
-- O YouTube pode alterar seu sistema de busca ou limitar consultas automatizadas.
-- Se a pesquisa não retornar resultados recentes, tente aumentar o valor de `--dias` ou usar `--dias 0`.
+- The script uses YouTube’s public search through `yt-dlp`.
+
+- Providing an API key is not necessary.
+
+- The hashtags are suggestions based on the videos found; they do not guarantee an increase in views.
+
+- YouTube may change its search system or limit automated queries.
+
+- If the search does not return recent results, try increasing the value of `--dias` or using `--dias 0`.
