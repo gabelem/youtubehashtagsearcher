@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Trending YouTube hashtag searcher. YES... this was vibecoded @-@
+"""Trending YouTube hashtag generator. YES... this was vibecoded @-@
 
 The search uses YouTube's public search engine through yt-dlp.
 Installation: python -m pip install -U yt-dlp
